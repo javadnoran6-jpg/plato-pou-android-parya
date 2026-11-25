@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>بازی پو کامل اندروید — پریا چش رنگی</title>
+<style>
+*{box-sizing:border-box;user-select:none}body{margin:0;background:#111419;color:#f1f5f9;font-family:sans-serif;display:flex;flex-direction:column;min-height:100vh}
+.top{display:flex;justify-content:space-between;padding:10px 14px;background:#191e26;border-bottom:1px solid #2a3240}
+.bars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 12px;background:#151921;font-size:11px;text-align:center}
+.bar{height:6px;background:#0b0e14;border-radius:99px;overflow:hidden;margin-top:4px}.fill{height:100%;transition:width .2s}
+.rooms{display:flex;gap:6px;padding:8px 12px;overflow-x:auto}.rb{flex:1;min-height:38px;border-radius:10px;border:1px solid #2d3748;background:#1e2430;color:#cbd5e1;font-weight:bold;font-size:12px}
+.rb.on{background:#1d8bf1;color:#fff;border-color:#38bdf8}.wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px}
+canvas{width:100%;max-width:400px;height:280px;border-radius:18px;border:1px solid #2d3748;touch-action:none}
+.ctrl{width:100%;max-width:400px;margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.b{min-height:44px;border-radius:10px;border:1px solid #2d3748;background:#232a38;color:#fff;font-weight:bold;font-size:12px}
+</style></head><body>
+<div class="top"><b>پو کامل اندروید</b><span id="coins" style="color:#fbbf24">🪙 200</span></div>
+<div class="bars">
+<div>🍔 <span id="vh">85%</span><div class="bar"><div id="bh" class="fill" style="background:#f97316;width:85%"></div></div></div>
+<div>🫧 <span id="vc">85%</span><div class="bar"><div id="bc" class="fill" style="background:#38bdf8;width:85%"></div></div></div>
+<div>⚡ <span id="ve">85%</span><div class="bar"><div id="be" class="fill" style="background:#10b981;width:85%"></div></div></div>
+<div>❤️ <span id="vp">90%</span><div class="bar"><div id="bp" class="fill" style="background:#f43f5e;width:90%"></div></div></div>
+</div>
+<div class="rooms">
+<button class="rb on" onclick="setR('k',this)">🍕 غذا</button>
+<button class="rb" onclick="setR('b',this)">🛁 حمام</button>
+<button class="rb" onclick="setR('s',this)">🛏️ خواب</button>
+<button class="rb" onclick="setR('g',this)">🎮 بازی</button>
+</div>
+<div class="wrap"><canvas id="c" width="400" height="280"></canvas><div id="p" class="ctrl"></div></div>
+<script>
+const s=JSON.parse(localStorage.getItem('pou_apk')||'null')||{h:85,c:85,e:85,p:90,coins:200,lamp:true};
+let rm='k',foam=0,chew=0,drops=[],mini=false,mx=200,mscore=0,items=[];
+const cv=document.getElementById('c'),x=cv.getContext('2d');
+function sv(){localStorage.setItem('pou_apk',JSON.stringify(s));
+['h','c','e','p'].forEach(k=>{s[k]=Math.max(0,Math.min(100,Math.round(s[k])));
+document.getElementById('v'+k).textContent=s[k]+'%';document.getElementById('b'+k).style.width=s[k]+'%';});
+document.getElementById('coins').textContent='🪙 '+s.coins;}
+function setR(r,btn){rm=r;mini=(r==='g');document.querySelectorAll('.rb').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');ui();}
+function ui(){const p=document.getElementById('p');
+if(rm==='k')p.innerHTML='<button class="b" onclick="eat(20,0)">🍎 سیب</button><button class="b" onclick="eat(30,10)">🍕 پیتزا</button><button class="b" onclick="eat(35,12)">🍔 برگر</button><button class="b" onclick="eat(15,8)">🍦 بستنی</button>';
+else if(rm==='b')p.innerHTML='<button class="b" style="grid-column:span 2" onclick="foam+=5;s.c+=10;sv()">🧼 صابون</button><button class="b" style="grid-column:span 2;background:#0ea5e9" onclick="foam=0;s.c=100;drops=Array.from({length:16},()=>({x:130+Math.random()*140,y:10}));sv()">🚿 دوش آب</button>';
+else if(rm==='s')p.innerHTML='<button class="b" style="grid-column:span 4;background:#4f46e5" onclick="s.lamp=!s.lamp;s.e=Math.min(100,s.e+20);sv();ui()">💡 '+(s.lamp?'خاموش کردن چراغ و استراحت':'روشن کردن چراغ')+'</button>';
+else p.innerHTML='<button class="b" style="grid-column:span 2" onclick="mx=Math.min(360,mx+40)">➡️ راست</button><button class="b" style="grid-column:span 2" onclick="mx=Math.max(40,mx-40)">⬅️ چپ</button>';}
+function eat(v,c){if(s.coins<c)return;s.coins-=c;s.h+=v;s.p+=8;chew=24;sv();}
+cv.onpointerdown=e=>{const r=cv.getBoundingClientRect();const px=(e.clientX-r.left)*(400/r.width);if(mini)mx=px;else{s.p+=4;s.coins+=3;sv();}};
+cv.onpointermove=e=>{if(mini){const r=cv.getBoundingClientRect();mx=(e.clientX-r.left)*(400/r.width);}};
+function drawPou(cx,cy,sc){x.save();x.translate(cx,cy);x.scale(sc,sc);x.fillStyle='#8B5A2B';x.beginPath();
+x.moveTo(0,-60);x.bezierCurveTo(55,-56,70,14,58,48);x.bezierCurveTo(42,68,-42,68,-58,48);x.bezierCurveTo(-70,14,-55,-56,0,-60);x.fill();
+[-18,18].forEach(ex=>{x.fillStyle='#fff';x.beginPath();x.arc(ex,-12,12,0,7);x.fill();x.fillStyle='#0f172a';x.beginPath();x.arc(ex,-12,5.5,0,7);x.fill();});
+x.strokeStyle='#0f172a';x.lineWidth=3;if(chew>0){chew--;x.fillStyle='#881337';x.beginPath();x.arc(0,16,10,0,7);x.fill();}else{x.beginPath();x.arc(0,12,14,0.4,2.7);x.stroke();}
+x.restore();}
+function loop(){x.clearRect(0,0,400,280);
+if(mini){x.fillStyle='#0c4a6e';x.fillRect(0,0,400,280);
+if(Math.random()<0.045)items.push({x:25+Math.random()*350,y:-10,bad:Math.random()<0.22});
+items=items.filter(it=>{it.y+=3.2;x.font='22px sans-serif';x.fillText(it.bad?'💣':'🍔',it.x-10,it.y);
+if(Math.abs(it.x-mx)<32&&Math.abs(it.y-230)<30){if(it.bad){mscore=0;}else{mscore+=10;s.coins+=4;sv();}return false;}return it.y<295;});
+x.fillStyle='#fff';x.font='bold 14px sans-serif';x.fillText('امتیاز: '+mscore,16,24);drawPou(mx,230,0.46);}
+else{x.fillStyle=rm==='b'?'#0e4f6e':rm==='s'&&!s.lamp?'#060913':'#2a1d17';x.fillRect(0,0,400,280);drawPou(200,160,1);
+for(let i=0;i<foam;i++){x.fillStyle='rgba(255,255,255,.75)';x.beginPath();x.arc(160+((i*37)%80),125+((i*23)%60),8,0,7);x.fill();}
+drops=drops.filter(d=>{d.y+=5;x.fillStyle='#38bdf8';x.fillRect(d.x,d.y,3,10);return d.y<250;});}
+requestAnimationFrame(loop);}
+ui();sv();loop();
+</script></body></html>
