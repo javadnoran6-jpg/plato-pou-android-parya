@@ -1,0 +1,39 @@
+name: Build Plato APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Accept Android SDK Licenses
+        run: yes | sdkmanager --licenses || true
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+      - name: Build Debug APK
+        run: gradle assembleDebug --no-daemon
+      - name: Rename APK for Direct Download
+        run: cp app/build/outputs/apk/debug/app-debug.apk Plato-Pou-Parya.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Plato-Pou-Parya-APK
+          path: Plato-Pou-Parya.apk
+      - name: Publish Direct Download Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-apk
+          name: Plato & Pou Android APK (Direct Download)
+          files: Plato-Pou-Parya.apk
+          overwrite: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
